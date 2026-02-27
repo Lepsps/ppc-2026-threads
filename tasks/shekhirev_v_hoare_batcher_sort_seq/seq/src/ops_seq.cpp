@@ -4,7 +4,6 @@
 #include <climits>
 #include <cstddef>
 #include <stack>
-#include <tuple>
 #include <utility>
 #include <vector>
 
@@ -36,6 +35,22 @@ bool ShekhirevHoareBatcherSortSEQ::PreProcessingImpl() {
   return true;
 }
 
+void ShekhirevHoareBatcherSortSEQ::RunHoarePartition(std::vector<int> &arr, int pivot, int &i, int &j) {
+  while (i <= j) {
+    while (arr[i] < pivot) {
+      i++;
+    }
+    while (arr[j] > pivot) {
+      j--;
+    }
+    if (i <= j) {
+      std::swap(arr[i], arr[j]);
+      i++;
+      j--;
+    }
+  }
+}
+
 void ShekhirevHoareBatcherSortSEQ::HoareSort(std::vector<int> &arr, int left, int right) {
   if (left >= right) {
     return;
@@ -56,19 +71,7 @@ void ShekhirevHoareBatcherSortSEQ::HoareSort(std::vector<int> &arr, int left, in
     int i = l;
     int j = r;
 
-    while (i <= j) {
-      while (arr[i] < pivot) {
-        i++;
-      }
-      while (arr[j] > pivot) {
-        j--;
-      }
-      if (i <= j) {
-        std::swap(arr[i], arr[j]);
-        i++;
-        j--;
-      }
-    }
+    RunHoarePartition(arr, pivot, i, j);
 
     if (i < r) {
       tasks.emplace(i, r);
@@ -107,7 +110,6 @@ void ShekhirevHoareBatcherSortSEQ::BatcherMerge(std::vector<int> &arr, int left,
       }
     } else {
       tasks.push({task.l, task.r, task.s, true});
-
       tasks.push({task.l + task.s, task.r, task.s * 2, false});
       tasks.push({task.l, task.r, task.s * 2, false});
     }

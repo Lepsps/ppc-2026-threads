@@ -2,7 +2,6 @@
 
 #include <algorithm>
 #include <cstddef>
-#include <vector>
 
 #include "shekhirev_v_hoare_batcher_sort_seq/common/include/common.hpp"
 #include "shekhirev_v_hoare_batcher_sort_seq/seq/include/ops_seq.hpp"
@@ -15,13 +14,13 @@ class ShekhirevVRunPerfTest : public ppc::util::BaseRunPerfTests<InType, OutType
   ShekhirevVRunPerfTest() = default;
 
  protected:
-  const size_t kArraySize = 200000;
+  const size_t k_array_size = 200000;
   InType input_data;
 
   void SetUp() override {
-    input_data.resize(kArraySize);
-    for (size_t i = 0; i < kArraySize; ++i) {
-      input_data[i] = static_cast<int>(kArraySize - i);
+    input_data.resize(k_array_size);
+    for (size_t i = 0; i < k_array_size; ++i) {
+      input_data[i] = static_cast<int>(k_array_size - i);
     }
   }
 

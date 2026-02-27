@@ -3,8 +3,8 @@
 #include <algorithm>
 #include <vector>
 
-#include "common/include/common.hpp"
-#include "seq/include/ops_seq.hpp"
+#include "shekhirev_v_hoare_batcher_sort_seq/common/include/common.hpp"
+#include "shekhirev_v_hoare_batcher_sort_seq/seq/include/ops_seq.hpp"
 #include "util/include/perf_test_util.hpp"
 
 namespace shekhirev_v_hoare_batcher_sort_seq {

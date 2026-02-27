@@ -1,4 +1,4 @@
-#include "seq/include/ops_seq.hpp"
+#include "shekhirev_v_hoare_batcher_sort_seq/seq/include/ops_seq.hpp"
 
 #include <algorithm>
 #include <climits>

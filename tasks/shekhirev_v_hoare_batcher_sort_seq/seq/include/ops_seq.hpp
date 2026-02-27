@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "common/include/common.hpp"
+#include "shekhirev_v_hoare_batcher_sort_seq/common/include/common.hpp"
 
 namespace shekhirev_v_hoare_batcher_sort_seq {
 

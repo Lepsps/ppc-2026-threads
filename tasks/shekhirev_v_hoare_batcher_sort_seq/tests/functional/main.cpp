@@ -4,8 +4,8 @@
 #include <random>
 #include <vector>
 
-#include "common/include/common.hpp"
-#include "seq/include/ops_seq.hpp"
+#include "shekhirev_v_hoare_batcher_sort_seq/common/include/common.hpp"
+#include "shekhirev_v_hoare_batcher_sort_seq/seq/include/ops_seq.hpp"
 
 namespace shekhirev_v_hoare_batcher_sort_seq {
 

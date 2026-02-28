@@ -6,10 +6,11 @@
 #include <random>
 #include <string>
 #include <tuple>
-#include <vector>
 
+#include "shekhirev_v_hoare_batcher_sort_seq/common/include/common.hpp"
 #include "shekhirev_v_hoare_batcher_sort_seq/seq/include/ops_seq.hpp"
 #include "util/include/func_test_util.hpp"
+#include "util/include/util.hpp"
 
 namespace shekhirev_v_hoare_batcher_sort_seq {
 
@@ -25,18 +26,18 @@ class ShekhirevVFuncTest : public ppc::util::BaseRunFuncTests<InType, OutType, T
  protected:
   void SetUp() override {
     auto [size, seed] = std::get<static_cast<std::size_t>(ppc::util::GTestParamIndex::kTestParams)>(GetParam());
-    input_data.resize(size);
+    input_data_.resize(size);
     if (size > 0) {
       std::mt19937 gen(seed);
       std::uniform_int_distribution<int> dist(-1000, 1000);
-      for (auto &val : input_data) {
+      for (auto &val : input_data_) {
         val = dist(gen);
       }
     }
   }
 
   InType GetTestInputData() final {
-    return input_data;
+    return input_data_;
   }
 
   bool CheckTestOutputData(OutType &output_data) final {
@@ -44,7 +45,7 @@ class ShekhirevVFuncTest : public ppc::util::BaseRunFuncTests<InType, OutType, T
   }
 
  private:
-  InType input_data;
+  InType input_data_;
 };
 
 TEST_P(ShekhirevVFuncTest, SeqSortTests) {

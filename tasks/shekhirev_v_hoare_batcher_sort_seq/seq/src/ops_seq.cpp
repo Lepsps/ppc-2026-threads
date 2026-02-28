@@ -2,6 +2,8 @@
 
 #include <algorithm>
 #include <climits>
+#include <cstddef>
+#include <tuple>
 #include <utility>
 #include <vector>
 
@@ -37,54 +39,75 @@ bool ShekhirevHoareBatcherSortSEQ::PreProcessingImpl() {
   return true;
 }
 
-void ShekhirevHoareBatcherSortSEQ::HoareSort(std::vector<int> &arr, int left, int right) {
-  if (left >= right) {
-    return;
-  }
+void ShekhirevHoareBatcherSortSEQ::HoareSort(std::vector<int> &arr, int start_left, int start_right) {
+  std::vector<std::pair<int, int>> stk;
+  stk.reserve(32);
+  stk.emplace_back(start_left, start_right);
 
-  int pivot = arr[left + (right - left) / 2];
-  int i = left;
-  int j = right;
+  while (!stk.empty()) {
+    auto [left, right] = stk.back();
+    stk.pop_back();
 
-  while (i <= j) {
-    while (arr[i] < pivot) {
-      i++;
+    if (left >= right) {
+      continue;
     }
-    while (arr[j] > pivot) {
-      j--;
-    }
-    if (i <= j) {
-      std::swap(arr[i], arr[j]);
-      i++;
-      j--;
-    }
-  }
 
-  if (left < j) {
-    HoareSort(arr, left, j);
-  }
-  if (i < right) {
-    HoareSort(arr, i, right);
+    int pivot = arr[left + ((right - left) / 2)];
+    int i = left;
+    int j = right;
+
+    while (i <= j) {
+      while (arr[i] < pivot) {
+        i++;
+      }
+      while (arr[j] > pivot) {
+        j--;
+      }
+      if (i <= j) {
+        std::swap(arr[i], arr[j]);
+        i++;
+        j--;
+      }
+    }
+
+    if (i < right) {
+      stk.emplace_back(i, right);
+    }
+    if (left < j) {
+      stk.emplace_back(left, j);
+    }
   }
 }
 
-void ShekhirevHoareBatcherSortSEQ::BatcherMerge(std::vector<int> &arr, int left, int right, int r) {
-  int n = right - left + 1;
-  int m = r * 2;
+void ShekhirevHoareBatcherSortSEQ::BatcherMerge(std::vector<int> &arr, int start_left, int start_right, int start_r) {
+  std::vector<std::tuple<int, int, int, int>> stk;
+  stk.reserve(32);
+  stk.emplace_back(start_left, start_right, start_r, 0);
 
-  if (m < n) {
-    BatcherMerge(arr, left, right, m);
-    BatcherMerge(arr, left + r, right, m);
+  while (!stk.empty()) {
+    auto [left, right, r, stage] = stk.back();
+    stk.pop_back();
 
-    for (int i = left + r; i + r <= right; i += m) {
-      if (arr[i] > arr[i + r]) {
-        std::swap(arr[i], arr[i + r]);
+    int n = right - left + 1;
+    int m = r * 2;
+
+    if (m < n) {
+      if (stage == 0) {
+        stk.emplace_back(left, right, r, 1);
+        stk.emplace_back(left + r, right, m, 0);
+        stk.emplace_back(left, right, m, 0);
+      } else {
+        for (int i = left + r; i + r <= right; i += m) {
+          if (arr[i] > arr[i + r]) {
+            std::swap(arr[i], arr[i + r]);
+          }
+        }
       }
-    }
-  } else {
-    if (left + r <= right) {
-      if (arr[left] > arr[left + r]) {
-        std::swap(arr[left], arr[left + r]);
+    } else {
+      if ((left + r) <= right) {
+        if (arr[left] > arr[left + r]) {
+          std::swap(arr[left], arr[left + r]);
+        }
       }
     }
   }

@@ -1,67 +1,64 @@
 #include <gtest/gtest.h>
 
 #include <algorithm>
+#include <array>
 #include <cstddef>
 #include <random>
+#include <string>
+#include <tuple>
 #include <vector>
 
 #include "shekhirev_v_hoare_batcher_sort_seq/seq/include/ops_seq.hpp"
+#include "util/include/func_test_util.hpp"
 
 namespace shekhirev_v_hoare_batcher_sort_seq {
 
-namespace {
-std::vector<int> GenerateRandomVector(size_t size) {
-  std::vector<int> res(size);
-  std::random_device rd;
-  std::mt19937 gen(rd());
-  std::uniform_int_distribution<int> dist(-1000, 1000);
-  for (size_t i = 0; i < size; ++i) {
-    res[i] = dist(gen);
+using TaskTestType = std::tuple<size_t, int>;
+
+class ShekhirevVFuncTest : public ppc::util::BaseRunFuncTests<InType, OutType, TaskTestType> {
+ protected:
+  void SetUp() override {
+    auto [size, seed] = std::get<static_cast<std::size_t>(ppc::util::GTestParamIndex::kTestParams)>(GetParam());
+    input_data.resize(size);
+    if (size > 0) {
+      std::mt19937 gen(seed);
+      std::uniform_int_distribution<int> dist(-1000, 1000);
+      for (auto &val : input_data) {
+        val = dist(gen);
+      }
+    }
   }
-  return res;
+
+  InType GetTestInputData() final {
+    return input_data;
+  }
+
+  bool CheckTestOutputData(OutType &output_data) final {
+    return std::ranges::is_sorted(output_data);
+  }
+
+ private:
+  InType input_data;
+};
+
+TEST_P(ShekhirevVFuncTest, SeqSortTests) {
+  ExecuteTest(GetParam());
 }
 
-void RunFuncTest(const std::vector<int> &in) {
-  ShekhirevHoareBatcherSortSEQ task(in);
-  task.Validation();
-  task.PreProcessing();
-  task.Run();
-  task.PostProcessing();
+namespace {
 
-  std::vector<int> out = task.GetOutput();
-  std::vector<int> expected = in;
-  std::ranges::sort(expected);
+const std::array<TaskTestType, 6> kTestParams = {std::make_tuple(0, 42),  std::make_tuple(1, 42),
+                                                 std::make_tuple(8, 7),   std::make_tuple(13, 13),
+                                                 std::make_tuple(128, 1), std::make_tuple(200, 123)};
 
-  ASSERT_EQ(out, expected);
-}
+const auto kTestTasksList = std::tuple_cat(ppc::util::AddFuncTask<ShekhirevHoareBatcherSortSEQ, InType>(
+    kTestParams, PPC_SETTINGS_shekhirev_v_hoare_batcher_sort_seq));
+
+const auto kGtestValues = ppc::util::ExpandToValues(kTestTasksList);
+
+INSTANTIATE_TEST_SUITE_P(SeqSortTests_Group, ShekhirevVFuncTest, kGtestValues,
+                         ShekhirevVFuncTest::PrintFuncTestName<ShekhirevVFuncTest>);
+
 }  // namespace
-
-TEST(ShekhirevVHoareBatcherSortSEQ, TestEmpty) {
-  RunFuncTest({});
-}
-
-TEST(ShekhirevVHoareBatcherSortSEQ, TestSingleElement) {
-  RunFuncTest({42});
-}
-
-TEST(ShekhirevVHoareBatcherSortSEQ, TestSorted) {
-  RunFuncTest({1, 2, 3, 4, 5, 6, 7, 8});
-}
-
-TEST(ShekhirevVHoareBatcherSortSEQ, TestReverseSorted) {
-  RunFuncTest({8, 7, 6, 5, 4, 3, 2, 1});
-}
-
-TEST(ShekhirevVHoareBatcherSortSEQ, TestIdenticalElements) {
-  RunFuncTest({5, 5, 5, 5, 5});
-}
-
-TEST(ShekhirevVHoareBatcherSortSEQ, TestRandomPowerOf2) {
-  RunFuncTest(GenerateRandomVector(64));
-}
-
-TEST(ShekhirevVHoareBatcherSortSEQ, TestRandomNotPowerOf2) {
-  RunFuncTest(GenerateRandomVector(53));
-}
 
 }  // namespace shekhirev_v_hoare_batcher_sort_seq

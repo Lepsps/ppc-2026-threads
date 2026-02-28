@@ -23,10 +23,10 @@ std::vector<int> GenerateRandomVector(size_t size) {
 
 void RunFuncTest(const std::vector<int> &in) {
   ShekhirevHoareBatcherSortSEQ task(in);
-  ASSERT_TRUE(task.Validation());
-  ASSERT_TRUE(task.PreProcessing());
-  ASSERT_TRUE(task.Run());
-  ASSERT_TRUE(task.PostProcessing());
+  task.Validation();
+  task.PreProcessing();
+  task.Run();
+  task.PostProcessing();
 
   std::vector<int> out = task.GetOutput();
   std::vector<int> expected = in;

@@ -11,6 +11,39 @@
 
 namespace shekhirev_v_hoare_batcher_sort_seq {
 
+namespace {
+
+int HoarePartition(std::vector<int> &arr, int left, int right) {
+  int pivot = arr[left + ((right - left) / 2)];
+  int i = left;
+  int j = right;
+
+  while (i <= j) {
+    while (arr[i] < pivot) {
+      i++;
+    }
+    while (arr[j] > pivot) {
+      j--;
+    }
+    if (i <= j) {
+      std::swap(arr[i], arr[j]);
+      i++;
+      j--;
+    }
+  }
+  return i;
+}
+
+void BatcherComp(std::vector<int> &arr, int left, int right, int r, int m) {
+  for (int i = left + r; i + r <= right; i += m) {
+    if (arr[i] > arr[i + r]) {
+      std::swap(arr[i], arr[i + r]);
+    }
+  }
+}
+
+}  // namespace
+
 ShekhirevHoareBatcherSortSEQ::ShekhirevHoareBatcherSortSEQ(const InType &in) {
   SetTypeOfTask(GetStaticTypeOfTask());
   GetInput() = in;
@@ -52,29 +85,12 @@ void ShekhirevHoareBatcherSortSEQ::HoareSort(std::vector<int> &arr, int start_le
       continue;
     }
 
-    int pivot = arr[left + ((right - left) / 2)];
-    int i = left;
-    int j = right;
-
-    while (i <= j) {
-      while (arr[i] < pivot) {
-        i++;
-      }
-      while (arr[j] > pivot) {
-        j--;
-      }
-      if (i <= j) {
-        std::swap(arr[i], arr[j]);
-        i++;
-        j--;
-      }
+    int partition_index = HoarePartition(arr, left, right);
+    if (partition_index < right) {
+      stk.emplace_back(partition_index, right);
     }
-
-    if (i < right) {
-      stk.emplace_back(i, right);
-    }
-    if (left < j) {
-      stk.emplace_back(left, j);
+    if (left < partition_index - 1) {
+      stk.emplace_back(left, partition_index - 1);
     }
   }
 }
@@ -97,11 +113,7 @@ void ShekhirevHoareBatcherSortSEQ::BatcherMerge(std::vector<int> &arr, int start
         stk.emplace_back(left + r, right, m, 0);
         stk.emplace_back(left, right, m, 0);
       } else {
-        for (int i = left + r; i + r <= right; i += m) {
-          if (arr[i] > arr[i + r]) {
-            std::swap(arr[i], arr[i + r]);
-          }
-        }
+        BatcherComp(arr, left, right, r, m);
       }
     } else {
       if ((left + r) <= right) {
@@ -124,7 +136,6 @@ bool ShekhirevHoareBatcherSortSEQ::RunImpl() {
 
   HoareSort(data, 0, mid - 1);
   HoareSort(data, mid, n - 1);
-
   BatcherMerge(data, 0, n - 1, 1);
 
   return true;

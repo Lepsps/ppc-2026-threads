@@ -2,7 +2,6 @@
 
 #include <algorithm>
 #include <cstddef>
-#include <vector>
 
 #include "shekhirev_v_hoare_batcher_sort_seq/common/include/common.hpp"
 #include "shekhirev_v_hoare_batcher_sort_seq/seq/include/ops_seq.hpp"

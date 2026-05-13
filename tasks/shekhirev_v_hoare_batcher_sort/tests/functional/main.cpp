@@ -8,7 +8,9 @@
 #include <tuple>
 
 #include "shekhirev_v_hoare_batcher_sort/common/include/common.hpp"
+#include "shekhirev_v_hoare_batcher_sort/omp/include/ops_omp.hpp"
 #include "shekhirev_v_hoare_batcher_sort/seq/include/ops_seq.hpp"
+#include "shekhirev_v_hoare_batcher_sort/tbb/include/ops_tbb.hpp"
 #include "util/include/func_test_util.hpp"
 #include "util/include/util.hpp"
 
@@ -48,21 +50,26 @@ class ShekhirevVFuncTest : public ppc::util::BaseRunFuncTests<InType, OutType, T
   InType input_data_;
 };
 
-TEST_P(ShekhirevVFuncTest, SeqSortTests) {
+TEST_P(ShekhirevVFuncTest, SeqOmpTbbSortTests) {
   ExecuteTest(GetParam());
 }
 
 namespace {
-const std::array<TaskTestType, 6> kTestParams = {std::make_tuple(0, 42),  std::make_tuple(1, 42),
-                                                 std::make_tuple(8, 7),   std::make_tuple(13, 13),
-                                                 std::make_tuple(128, 1), std::make_tuple(200, 123)};
+const std::array<TaskTestType, 8> kTestParams = {
+    std::make_tuple(0, 42),  std::make_tuple(1, 42),    std::make_tuple(8, 7),    std::make_tuple(13, 13),
+    std::make_tuple(128, 1), std::make_tuple(200, 123), std::make_tuple(256, 88), std::make_tuple(500, 999),
+};
 
 const auto kTestTasksList = std::tuple_cat(ppc::util::AddFuncTask<ShekhirevHoareBatcherSortSEQ, InType>(
-    kTestParams, PPC_SETTINGS_shekhirev_v_hoare_batcher_sort));
+                                               kTestParams, PPC_SETTINGS_shekhirev_v_hoare_batcher_sort),
+                                           ppc::util::AddFuncTask<ShekhirevHoareBatcherSortOMP, InType>(
+                                               kTestParams, PPC_SETTINGS_shekhirev_v_hoare_batcher_sort),
+                                           ppc::util::AddFuncTask<ShekhirevHoareBatcherSortTBB, InType>(
+                                               kTestParams, PPC_SETTINGS_shekhirev_v_hoare_batcher_sort));
 
 const auto kGtestValues = ppc::util::ExpandToValues(kTestTasksList);
 
-INSTANTIATE_TEST_SUITE_P(SeqSortTests_Group, ShekhirevVFuncTest, kGtestValues,
+INSTANTIATE_TEST_SUITE_P(SeqOmpTbbSortTests_Group, ShekhirevVFuncTest, kGtestValues,
                          ShekhirevVFuncTest::PrintFuncTestName<ShekhirevVFuncTest>);
 }  // namespace
 

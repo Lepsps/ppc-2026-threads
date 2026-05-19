@@ -100,23 +100,28 @@ void MergeBlocks(std::vector<int> &arr, int start1, int start2, int chunk_size) 
   }
 }
 
+void DispatchMergeTasks(std::vector<int> &data, int num_threads, int chunk_size, int step_p, int step_k,
+                        std::vector<std::thread> &threads) {
+  for (int step_j = step_k % step_p; step_j + step_k < num_threads; step_j += (step_k * 2)) {
+    for (int i = 0; i < std::min(step_k, num_threads - step_j - step_k); ++i) {
+      if ((step_j + i) / (step_p * 2) == (step_j + i + step_k) / (step_p * 2)) {
+        int start_a = (step_j + i) * chunk_size;
+        int start_b = (step_j + i + step_k) * chunk_size;
+
+        threads.emplace_back(
+            [&data, start_a, start_b, chunk_size]() { MergeBlocks(data, start_a, start_b, chunk_size); });
+      }
+    }
+  }
+}
+
 void BatcherMergePhase(std::vector<int> &data, int num_threads, int chunk_size) {
   std::vector<std::thread> threads;
   threads.reserve(num_threads);
 
   for (int step_p = 1; step_p < num_threads; step_p *= 2) {
     for (int step_k = step_p; step_k > 0; step_k /= 2) {
-      for (int step_j = step_k % step_p; step_j + step_k < num_threads; step_j += (step_k * 2)) {
-        for (int i = 0; i < std::min(step_k, num_threads - step_j - step_k); ++i) {
-          if ((step_j + i) / (step_p * 2) == (step_j + i + step_k) / (step_p * 2)) {
-            int start_a = (step_j + i) * chunk_size;
-            int start_b = (step_j + i + step_k) * chunk_size;
-
-            threads.emplace_back(
-                [&data, start_a, start_b, chunk_size]() { MergeBlocks(data, start_a, start_b, chunk_size); });
-          }
-        }
-      }
+      DispatchMergeTasks(data, num_threads, chunk_size, step_p, step_k, threads);
 
       for (auto &t : threads) {
         t.join();

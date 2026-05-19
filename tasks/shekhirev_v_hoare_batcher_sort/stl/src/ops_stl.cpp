@@ -106,13 +106,15 @@ void BatcherMergePhase(std::vector<int> &data, int num_threads, int chunk_size) 
 
   for (int step_p = 1; step_p < num_threads; step_p *= 2) {
     for (int step_k = step_p; step_k > 0; step_k /= 2) {
-      for (int idx = 0; idx < num_threads - step_k; ++idx) {
-        if ((idx / (step_p * 2)) == ((idx + step_k) / (step_p * 2))) {
-          int start_a = idx * chunk_size;
-          int start_b = (idx + step_k) * chunk_size;
+      for (int step_j = step_k % step_p; step_j + step_k < num_threads; step_j += (step_k * 2)) {
+        for (int i = 0; i < std::min(step_k, num_threads - step_j - step_k); ++i) {
+          if ((step_j + i) / (step_p * 2) == (step_j + i + step_k) / (step_p * 2)) {
+            int start_a = (step_j + i) * chunk_size;
+            int start_b = (step_j + i + step_k) * chunk_size;
 
-          threads.emplace_back(
-              [&data, start_a, start_b, chunk_size]() { MergeBlocks(data, start_a, start_b, chunk_size); });
+            threads.emplace_back(
+                [&data, start_a, start_b, chunk_size]() { MergeBlocks(data, start_a, start_b, chunk_size); });
+          }
         }
       }
 
